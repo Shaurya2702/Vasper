@@ -42,7 +42,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.example.MainApp</mainClass>
+                            <mainClass>org.example.controller.MainApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

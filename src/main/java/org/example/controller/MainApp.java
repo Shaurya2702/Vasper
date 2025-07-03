@@ -1,4 +1,10 @@
-package org.example;
+package org.example.controller;
+
+import org.example.model.ColorProvider;
+import org.example.model.WallpaperManager;
+import org.example.view.ColorTheme;
+import org.example.view.DailyDeityDisplay;
+import org.example.view.WallpaperSelectionPage;
 
 import javax.swing.*;
 import java.awt.*;

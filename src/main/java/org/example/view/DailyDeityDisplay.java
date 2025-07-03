@@ -1,4 +1,6 @@
-package org.example;
+package org.example.view;
+
+import org.example.model.ColorProvider;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,9 +44,9 @@ public class DailyDeityDisplay {
     };
 
     // UI Components
-    private JLabel deityLabel;
-    private JLabel mantraLabel;
-    private JLabel photoLabel;
+    private final JLabel deityLabel;
+    private final JLabel mantraLabel;
+    private final JLabel photoLabel;
 
     public DailyDeityDisplay(JPanel panel) {
         // Get the current day of the week

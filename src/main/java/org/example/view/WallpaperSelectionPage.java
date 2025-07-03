@@ -1,4 +1,7 @@
-package org.example;
+package org.example.view;
+
+import org.example.controller.MainApp;
+import org.example.model.WallpaperManager;
 
 import javax.swing.*;
 import java.awt.*;

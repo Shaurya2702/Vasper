@@ -1,12 +1,13 @@
 /**
  * This class provides a GradientPaint based on the Vastu-recommended colors for each day.
  */
-package org.example;
+package org.example.model;
 
 import java.awt.GradientPaint;
 import java.awt.Color;
 import java.util.Calendar;
 public class ColorProvider {
+
     public static GradientPaint getDayGradient(int width, int height) {
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_WEEK);

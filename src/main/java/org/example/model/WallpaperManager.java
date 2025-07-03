@@ -2,7 +2,7 @@
  *  this class is for changing the background using shell command
  */
 
-package org.example;
+package org.example.model;
 
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
