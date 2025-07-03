@@ -1,26 +1,36 @@
-/**
- * This class provides a GradientPaint based on the Vastu-recommended colors for each day.
- */
 package org.example.model;
 
-import java.awt.GradientPaint;
-import java.awt.Color;
+import java.awt.*;
 import java.util.Calendar;
+
 public class ColorProvider {
 
-    public static GradientPaint getDayGradient(int width, int height) {
-        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
+    // Struct-like pair for gradients
+    private static class ColorPair {
+        final Color start, end;
+        ColorPair(Color start, Color end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
 
-        return switch (day) {
-            case Calendar.MONDAY -> new GradientPaint(0, 0, Color.WHITE, width, height, new Color(192, 192, 192)); // White & Silver
-            case Calendar.TUESDAY -> new GradientPaint(0, 0, Color.RED, width, height, new Color(255, 165, 0)); // Red & Orange
-            case Calendar.WEDNESDAY -> new GradientPaint(0, 0, new Color(12, 143, 12), width, height, new Color(181, 101, 29)); // Green & Light Brown
-            case Calendar.THURSDAY -> new GradientPaint(0, 0, Color.YELLOW, width, height, new Color(255, 215, 0)); // Yellow & Gold
-            case Calendar.FRIDAY -> new GradientPaint(0, 0, new Color(255, 105, 180), width, height, Color.WHITE); // Pink & White
-            case Calendar.SATURDAY -> new GradientPaint(0, 0, Color.BLACK, width, height, new Color(25, 25, 112)); // Black & Dark Blue
-            case Calendar.SUNDAY -> new GradientPaint(0, 0, Color.YELLOW, width, height, new Color(0, 255, 0)); // Orange & Red
-            default -> new GradientPaint(0, 0, Color.WHITE, width, height, Color.GRAY); // Default Gradient
-        };
+    // Direct index-based lookup for days (0=Sunday to 6=Saturday)
+    private static final ColorPair[] DAY_GRADIENTS = {
+            new ColorPair(Color.YELLOW, new Color(0, 255, 0)),               // Sunday: Yellow → Green
+            new ColorPair(Color.WHITE, new Color(192, 192, 192)),            // Monday: White → Silver
+            new ColorPair(Color.RED, new Color(255, 165, 0)),                // Tuesday: Red → Orange
+            new ColorPair(new Color(12, 143, 12), new Color(181, 101, 29)),  // Wednesday: Green → Light Brown
+            new ColorPair(Color.YELLOW, new Color(255, 215, 0)),             // Thursday: Yellow → Gold
+            new ColorPair(new Color(255, 105, 180), Color.WHITE),            // Friday: Pink → White
+            new ColorPair(Color.BLACK, new Color(25, 25, 112))               // Saturday: Black → Midnight Blue
+    };
+
+    public static GradientPaint getDayGradient(int width, int height) {
+        int dayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1; // Sunday = 0
+        ColorPair pair = (dayIndex >= 0 && dayIndex < DAY_GRADIENTS.length)
+                ? DAY_GRADIENTS[dayIndex]
+                : new ColorPair(Color.WHITE, Color.GRAY); // Fallback
+
+        return new GradientPaint(0, 0, pair.start, width, height, pair.end);
     }
 }

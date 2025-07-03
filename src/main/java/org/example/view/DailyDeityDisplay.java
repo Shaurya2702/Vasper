@@ -2,151 +2,114 @@ package org.example.view;
 
 import org.example.model.ColorProvider;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
+import javax.swing.*;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Font;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Component;
-
-import java.util.Calendar;
 public class DailyDeityDisplay {
 
-    // Constants for days, deities, and mantras
-    private static final String[] DAYS = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-    private static final String[] DEITIES_SANSKRIT = {
-            "सूर्य देवः", // Lord Surya
-            "शिवः एवं पार्वती देवी", // Lord Shiva & Goddess Parvati
-            "हनुमान् एवं कार्तिकेयः", // Lord Hanuman & Lord Kartikeya
-            "गणेशः एवं बुध देवः", // Lord Ganesha & Mercury (Budh Dev)
-            "विष्णुः एवं बृहस्पतिः", // Lord Vishnu & Guru Brihaspati
-            "लक्ष्मी देवी एवं दुर्गा देवी", // Goddess Lakshmi & Goddess Durga
-            "शनि देवः एवं कृष्णः" // Lord Shani & Lord Krishna
-    };
-    private static final String[] MANTRA = {
-            "ॐ घृणिः सूर्याय नमः", // Sunday
-            "ॐ नमः शिवाय", // Monday
-            "ॐ हं हनुमते नमः", // Tuesday
-            "ॐ गं गणपतये नमः", // Wednesday
-            "ॐ नमो भगवते वासुदेवाय", // Thursday
-            "ॐ श्रीं महालक्ष्म्यै नमः", // Friday
-            "ॐ शं शनैश्चराय नमः\nॐ कृष्णाय गोविन्दाय नमो नमः" // Saturday
-    };
+    private static final int IMAGE_SIZE = 200;
 
-    // UI Components
-    private final JLabel deityLabel;
-    private final JLabel mantraLabel;
-    private final JLabel photoLabel;
+    // Consolidated Day Information using a data structure
+    private static class DayInfo {
+        final String deity;
+        final String mantra;
+        final String imageFile;
+
+        DayInfo(String deity, String mantra, String imageFile) {
+            this.deity = deity;
+            this.mantra = mantra;
+            this.imageFile = imageFile;
+        }
+    }
+
+    // Map of Day Index → DayInfo
+    private static final Map<Integer, DayInfo> DAY_INFO_MAP = Map.of(
+            Calendar.SUNDAY,    new DayInfo("सूर्य देवः", "ॐ घृणिः सूर्याय नमः", "sunday.jpg"),
+            Calendar.MONDAY,    new DayInfo("शिवः एवं पार्वती देवी", "ॐ नमः शिवाय", "monday.jpg"),
+            Calendar.TUESDAY,   new DayInfo("हनुमान् एवं कार्तिकेयः", "ॐ हं हनुमते नमः", "tuesday.jpg"),
+            Calendar.WEDNESDAY, new DayInfo("गणेशः एवं बुध देवः", "ॐ गं गणपतये नमः", "wednesday.jpg"),
+            Calendar.THURSDAY,  new DayInfo("विष्णुः एवं बृहस्पतिः", "ॐ नमो भगवते वासुदेवाय", "thursday.jpg"),
+            Calendar.FRIDAY,    new DayInfo("लक्ष्मी देवी एवं दुर्गा देवी", "ॐ श्रीं महालक्ष्म्यै नमः", "friday.jpg"),
+            Calendar.SATURDAY,  new DayInfo("शनि देवः एवं कृष्णः", "ॐ शं शनैश्चराय नमः\nॐ कृष्णाय गोविन्दाय नमो नमः", "saturday.jpg")
+    );
+
+    private final JLabel deityLabel = new JLabel("", SwingConstants.CENTER);
+    private final JLabel mantraLabel = new JLabel("", SwingConstants.CENTER);
+    private final JLabel photoLabel = new JLabel();
 
     public DailyDeityDisplay(JPanel panel) {
-        // Get the current day of the week
-        int dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1; // Sunday = 0, Monday = 1, etc.
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 
-        // Get the deity, mantra, and color for the day
-        String deity = DEITIES_SANSKRIT[dayOfWeek];
-        String mantra = MANTRA[dayOfWeek];
+        DayInfo info = DAY_INFO_MAP.getOrDefault(day, new DayInfo("देवता", "ॐ", "placeholder.jpg"));
         GradientPaint gradient = ColorProvider.getDayGradient(panel.getWidth(), panel.getHeight());
 
-        // Create and configure the deity label
-        deityLabel = createLabel(deity, new Font("Sanskrit Text", Font.BOLD, 28), gradient);
-
-        // Create and configure the mantra label
-        mantraLabel = createLabel("<html><center>" + mantra.replace("\n", "<br>") + "</center></html>",
+        setupLabel(deityLabel, info.deity, new Font("Sanskrit Text", Font.BOLD, 28), gradient);
+        setupLabel(mantraLabel, "<html><center>" + info.mantra.replace("\n", "<br>") + "</center></html>",
                 new Font("Sanskrit Text", Font.BOLD, 24), gradient);
 
-        // Load the photo for the day
-        photoLabel = new JLabel();
-        photoLabel.setPreferredSize(new Dimension(200, 200)); // Set preferred size for the photo
-        loadPhotoForDay(dayOfWeek);
-
-        // Create a panel to hold the image, deity name, and mantra
-        JPanel contentPanel = createContentPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(contentPanel, BorderLayout.CENTER); // Add content to the center of the panel
+        setupImage(info.imageFile);
+        setupPanel(panel);
     }
 
-    /**
-     * Creates a JLabel with the specified text, font, and gradient color.
-     */
-    private JLabel createLabel(String text, Font font, GradientPaint gradient) {
-        JLabel label = new JLabel(text, SwingConstants.CENTER) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setPaint(gradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-                super.paintComponent(g);
-            }
-        };
+    private void setupLabel(JLabel label, String text, Font font, GradientPaint gradient) {
         label.setFont(font);
-        label.setForeground(Color.WHITE); // Set text color to white for better visibility
-        return label;
+        label.setForeground(Color.WHITE);
+        label.setText(text);
+        label.setOpaque(false);
+
+        label.setUI(new GradientLabelUI(gradient)); // Use a custom UI delegate for consistent painting
     }
 
-    /**
-     * Creates the main content panel with the image, deity name, and mantra.
-     */
-    private JPanel createContentPanel() {
+    private void setupImage(String fileName) {
+        String imagePath = "src/main/java/org/example/images/" + fileName;
+        ImageIcon icon = new ImageIcon(imagePath);
+        Image img = icon.getImage().getScaledInstance(IMAGE_SIZE, IMAGE_SIZE, Image.SCALE_SMOOTH);
+        photoLabel.setIcon(new ImageIcon(img));
+        photoLabel.setPreferredSize(new Dimension(IMAGE_SIZE, IMAGE_SIZE));
+        photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+    private void setupPanel(JPanel panel) {
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setOpaque(false); // Transparent background
+        contentPanel.setOpaque(false);
 
-        // Add vertical glue to center the content
         contentPanel.add(Box.createVerticalGlue());
-
-        // Add the image (centered)
-        photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         contentPanel.add(photoLabel);
-
-        // Add space between the image and the text
         contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        // Add the deity label
-        deityLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(deityLabel);
-
-        // Add space between the deity label and the mantra
+        contentPanel.add(centerAlign(deityLabel));
         contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-
-        // Add the mantra label
-        mantraLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(mantraLabel);
-
-        // Add vertical glue to center the content
+        contentPanel.add(centerAlign(mantraLabel));
         contentPanel.add(Box.createVerticalGlue());
 
-        return contentPanel;
+        panel.setLayout(new BorderLayout());
+        panel.add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private Component centerAlign(JComponent comp) {
+        comp.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return comp;
     }
 
     /**
-     * Loads the photo for the given day of the week.
+     * Custom UI delegate to apply gradient background.
      */
-    private void loadPhotoForDay(int dayOfWeek) {
-        String imageName = DAYS[dayOfWeek].toLowerCase() + ".jpg"; // Image file name
-        String imagePath = "src/main/java/org/example/images/" + imageName; // Absolute file path
+    private static class GradientLabelUI extends javax.swing.plaf.basic.BasicLabelUI {
+        private final GradientPaint gradient;
 
-        System.out.println("Loading image: " + imagePath); // Debugging statement
-
-        // Load the image using an absolute file path
-        ImageIcon icon = new ImageIcon(imagePath);
-        if (icon.getImage() == null) {
-            System.out.println("Image not found: " + imagePath + ". Using placeholder.");
-            icon = new ImageIcon("src/main/java/org/example/images/placeholder.jpg");
+        public GradientLabelUI(GradientPaint gradient) {
+            this.gradient = gradient;
         }
-        System.out.println("Image loaded: " + imagePath); // Debugging statement
 
-        // Scale the image and set it to the photo label
-        Image scaledImage = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-        photoLabel.setIcon(new ImageIcon(scaledImage));
+        @Override
+        public void paint(Graphics g, JComponent c) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setPaint(gradient);
+            g2.fillRect(0, 0, c.getWidth(), c.getHeight());
+            g2.dispose();
+            super.paint(g, c);
+        }
     }
 }
