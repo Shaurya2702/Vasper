@@ -5,7 +5,6 @@ import org.example.model.ColorProvider;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class DailyDeityDisplay {
 
@@ -24,7 +23,6 @@ public class DailyDeityDisplay {
         }
     }
 
-    // Map of Day Index → DayInfo
     private static final Map<Integer, DayInfo> DAY_INFO_MAP = Map.of(
             Calendar.SUNDAY,    new DayInfo("सूर्य देवः", "ॐ घृणिः सूर्याय नमः", "sunday.jpg"),
             Calendar.MONDAY,    new DayInfo("शिवः एवं पार्वती देवी", "ॐ नमः शिवाय", "monday.jpg"),
@@ -39,36 +37,36 @@ public class DailyDeityDisplay {
     private final JLabel mantraLabel = new JLabel("", SwingConstants.CENTER);
     private final JLabel photoLabel = new JLabel();
 
-    public DailyDeityDisplay(JPanel panel) {
-        int day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+    public DailyDeityDisplay(JPanel panel, int todayDay) {
 
-        DayInfo info = DAY_INFO_MAP.getOrDefault(day, new DayInfo("देवता", "ॐ", "placeholder.jpg"));
-        GradientPaint gradient = ColorProvider.getDayGradient(panel.getWidth(), panel.getHeight());
+        DayInfo info = DAY_INFO_MAP.getOrDefault(todayDay, new DayInfo("देवता", "ॐ", "placeholder.jpg"));
+        GradientPaint gradient = ColorProvider.getDayGradient(panel.getWidth(), panel.getHeight(), todayDay);
+
+        setupImage(info.imageFile);
 
         setupLabel(deityLabel, info.deity, new Font("Sanskrit Text", Font.BOLD, 28), gradient);
         setupLabel(mantraLabel, "<html><center>" + info.mantra.replace("\n", "<br>") + "</center></html>",
                 new Font("Sanskrit Text", Font.BOLD, 24), gradient);
 
-        setupImage(info.imageFile);
+// adding all the image, test(label) on the panel
         setupPanel(panel);
     }
 
-    private void setupLabel(JLabel label, String text, Font font, GradientPaint gradient) {
-        label.setFont(font);
-        label.setForeground(Color.WHITE);
-        label.setText(text);
-        label.setOpaque(false);
-
-        label.setUI(new GradientLabelUI(gradient)); // Use a custom UI delegate for consistent painting
-    }
-
     private void setupImage(String fileName) {
-        String imagePath = "src/main/java/org/example/images/" + fileName;
-        ImageIcon icon = new ImageIcon(imagePath);
+        String resourcePath = "/DegnityImagesAccordingToDay/" + fileName;
+        java.net.URL imageUrl = getClass().getResource(resourcePath);
+        ImageIcon icon = new ImageIcon(imageUrl);
         Image img = icon.getImage().getScaledInstance(IMAGE_SIZE, IMAGE_SIZE, Image.SCALE_SMOOTH);
         photoLabel.setIcon(new ImageIcon(img));
         photoLabel.setPreferredSize(new Dimension(IMAGE_SIZE, IMAGE_SIZE));
         photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+    private void setupLabel(JLabel label, String text, Font font, GradientPaint gradient) {
+        label.setFont(font);
+        label.setForeground(Color.BLACK);
+        label.setText(text);
+        label.setOpaque(false);
     }
 
     private void setupPanel(JPanel panel) {
@@ -91,25 +89,5 @@ public class DailyDeityDisplay {
     private Component centerAlign(JComponent comp) {
         comp.setAlignmentX(Component.CENTER_ALIGNMENT);
         return comp;
-    }
-
-    /**
-     * Custom UI delegate to apply gradient background.
-     */
-    private static class GradientLabelUI extends javax.swing.plaf.basic.BasicLabelUI {
-        private final GradientPaint gradient;
-
-        public GradientLabelUI(GradientPaint gradient) {
-            this.gradient = gradient;
-        }
-
-        @Override
-        public void paint(Graphics g, JComponent c) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setPaint(gradient);
-            g2.fillRect(0, 0, c.getWidth(), c.getHeight());
-            g2.dispose();
-            super.paint(g, c);
-        }
     }
 }

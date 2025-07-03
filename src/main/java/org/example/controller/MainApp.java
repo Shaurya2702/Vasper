@@ -1,5 +1,6 @@
 package org.example.controller;
 
+
 import org.example.model.ColorProvider;
 import org.example.model.WallpaperManager;
 import org.example.view.ColorTheme;
@@ -16,7 +17,7 @@ public class MainApp extends JFrame {
         // today day
         final int todayDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         // calling the color provider class to get the today color
-        final GradientPaint todayGradientPaint = ColorProvider.getDayGradient(WIDTH, HEIGHT, todayDay);
+        GradientPaint todayGradientPaint = ColorProvider.getDayGradient(WIDTH, HEIGHT, todayDay);
         // Add the DailyDeityDisplay to the center panel
 
         ColorTheme.configureWindow(this, 800, 600); // Landscape mode (width > height)
