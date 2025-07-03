@@ -1,7 +1,6 @@
 package org.example.model;
 
 import java.awt.*;
-import java.util.Calendar;
 
 public class ColorProvider {
 
@@ -25,10 +24,9 @@ public class ColorProvider {
             new ColorPair(Color.BLACK, new Color(25, 25, 112))               // Saturday: Black → Midnight Blue
     };
 
-    public static GradientPaint getDayGradient(int width, int height) {
-        int dayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1; // Sunday = 0
+    public static GradientPaint getDayGradient(int width, int height, int dayIndex) { // Sunday = 0
         ColorPair pair = (dayIndex >= 0 && dayIndex < DAY_GRADIENTS.length)
-                ? DAY_GRADIENTS[dayIndex]
+                ? DAY_GRADIENTS[dayIndex-1]
                 : new ColorPair(Color.WHITE, Color.GRAY); // Fallback
 
         return new GradientPaint(0, 0, pair.start, width, height, pair.end);

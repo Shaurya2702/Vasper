@@ -8,18 +8,29 @@ import org.example.view.WallpaperSelectionPage;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Calendar;
 
 public class MainApp extends JFrame {
     public MainApp() {
+
+        // today day
+        final int todayDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        // calling the color provider class to get the today color
+        final GradientPaint todayGradientPaint = ColorProvider.getDayGradient(WIDTH, HEIGHT, todayDay);
+        // Add the DailyDeityDisplay to the center panel
+
         ColorTheme.configureWindow(this, 800, 600); // Landscape mode (width > height)
 
-        // Main panel with 3D gradient background
+
+
+
+// Main panel with 3D gradient background
         JPanel mainPanel = ColorTheme.createMainPanel();
 
-        // Top panel for control buttons
+
+    // Top panel for control buttons
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         topPanel.setOpaque(false); // Transparent background
-
         // Control buttons (Exit and Minimize)
         JButton exitButton = ColorTheme.createSmallControlButton("X");
         exitButton.addActionListener(e -> System.exit(0));
@@ -30,16 +41,11 @@ public class MainApp extends JFrame {
         topPanel.add(minimizeButton);
         topPanel.add(exitButton);
 
-        // Center panel for deity and mantra
+
+    // Center panel for deity and mantra
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setOpaque(false); // Transparent background
- 
-        // Add the DailyDeityDisplay to the center panel
-        new DailyDeityDisplay(centerPanel);
 
-        // Add components to the main panel
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         // Bottom panel for action buttons
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10)); // 20px horizontal gap, 10px vertical gap
@@ -54,8 +60,7 @@ public class MainApp extends JFrame {
                 final int WIDTH = screenSize.width;
                 final int HEIGHT = screenSize.height;
 
-                GradientPaint gradientPaint = ColorProvider.getDayGradient(WIDTH, HEIGHT);
-                String wallpaperPath = WallpaperManager.createSolidColorWallpaper(gradientPaint, WIDTH, HEIGHT);
+                String wallpaperPath = WallpaperManager.createSolidColorWallpaper(todayGradientPaint, WIDTH, HEIGHT);
                 WallpaperManager.setWindowsWallpaper(wallpaperPath);
                 JOptionPane.showMessageDialog(this, "Solid color wallpaper set successfully!");
             } catch (Exception ex) {
@@ -74,8 +79,17 @@ public class MainApp extends JFrame {
         });
         bottomPanel.add(wallpaperButton);
 
+
+// Add components to the main panel
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
+
+        // add the photo, name and the mantra
+        new DailyDeityDisplay(centerPanel, todayDay);
+
+// add the main panel to the frame
         add(mainPanel);
         setVisible(true);
     }
