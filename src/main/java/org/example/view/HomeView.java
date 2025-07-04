@@ -1,6 +1,6 @@
 package org.example.view;
 
-import org.example.model.WallpaperManager;
+import org.example.model.WallpaperSetter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,8 +33,8 @@ public class HomeView extends JFrame {
         JButton solidColorButton = ColorTheme.create3DButton("Set Solid Color");
         solidColorButton.addActionListener(e -> {
             try {
-                String wallpaperPath = WallpaperManager.createSolidColorWallpaper(todayGradientPaint, WIDTH, HEIGHT);
-                WallpaperManager.setWindowsWallpaper(wallpaperPath);
+                String wallpaperPath = WallpaperSetter.createSolidColorWallpaper(todayGradientPaint, WIDTH, HEIGHT);
+                WallpaperSetter.setWindowsWallpaper(wallpaperPath);
                 JOptionPane.showMessageDialog(this, "Solid color wallpaper set successfully!");
             } catch (Exception ex) {
                 ex.printStackTrace();

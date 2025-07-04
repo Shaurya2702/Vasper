@@ -12,7 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
-public class WallpaperManager {
+
+public class WallpaperSetter {
 
     public static String createSolidColorWallpaper(GradientPaint color, int WIDTH, int HEIGHT) throws IOException {
         // Create a solid color image
