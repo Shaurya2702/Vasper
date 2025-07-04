@@ -2,6 +2,7 @@ package org.example.view;
 
 import org.example.controller.AppController;
 import org.example.model.WallpaperGrouping;
+import org.example.model.WallpaperManager;
 import org.example.model.WallpaperSetter;
 
 import javax.imageio.ImageIO;
@@ -148,31 +149,11 @@ public class WallpaperSelectionPage extends JFrame {
         dialog.setVisible(true);
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            @Override
             protected Void doInBackground() {
-                for (List<String> list : groupedWallpapers.values()) list.clear();
+                groupedWallpapers.clear();
                 for (JPanel panel : dayPanels.values()) panel.removeAll();
 
-                String wallpapersDir = System.getProperty("user.home") + "\\Desktop\\Wallpapers";
-                try {
-                    Files.createDirectories(Paths.get(wallpapersDir));
-                    Files.list(Paths.get(wallpapersDir))
-                            .filter(path -> path.toString().endsWith(".jpg") || path.toString().endsWith(".png"))
-                            .forEach(path -> {
-                                try {
-                                    if (ImageIO.read(path.toFile()) != null) {
-                                        String day = WallpaperGrouping.getClosestDayForWallpaper(path.toString());
-                                        groupedWallpapers.get(day).add(path.toString());
-                                    } else {
-                                        System.err.println("Skipped unreadable image: " + path);
-                                    }
-                                } catch (IOException e) {
-                                    System.err.println("Error reading image: " + path + " | " + e.getMessage());
-                                }
-                            });
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                groupedWallpapers.putAll(WallpaperManager.loadGroupedWallpapers());
                 return null;
             }
 
@@ -214,11 +195,8 @@ public class WallpaperSelectionPage extends JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             File[] selectedFiles = fileChooser.getSelectedFiles();
             try {
-                String wallpapersDir = System.getProperty("user.home") + "\\Desktop\\Wallpapers";
-                Files.createDirectories(Paths.get(wallpapersDir));
                 for (File selected : selectedFiles) {
-                    Path target = Paths.get(wallpapersDir, selected.getName());
-                    Files.copy(selected.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+                    WallpaperGrouping.groupAndMoveIfNeeded(selected);
                 }
                 loadWallpapersInBackground();
             } catch (IOException ex) {

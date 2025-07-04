@@ -4,11 +4,14 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
+import java.util.List;
 
 public class WallpaperGrouping {
 
-    // Map of day to two representative gradient colors (start and end)
+    // Map of day to two representative gradient colors
     private static final Map<String, Color[]> DAY_COLOR_MAP = Map.of(
             "Monday",    new Color[]{Color.WHITE, new Color(192, 192, 192)},
             "Tuesday",   new Color[]{Color.RED, new Color(255, 165, 0)},
@@ -22,43 +25,44 @@ public class WallpaperGrouping {
     public static String getClosestDayForWallpaper(String imagePath) {
         try {
             BufferedImage image = ImageIO.read(new File(imagePath));
-            Color avgColor = getAverageColor(image);
-            return findClosestDay(avgColor);
+            List<Color> dominantColors = extractTwoDominantColors(image);
+
+            return findClosestDay(dominantColors);
         } catch (Exception e) {
             e.printStackTrace();
             return "Unknown";
         }
     }
 
-    private static Color getAverageColor(BufferedImage image) {
-        long sumRed = 0, sumGreen = 0, sumBlue = 0;
-        int count = 0;
+    private static List<Color> extractTwoDominantColors(BufferedImage image) {
+        Map<Integer, Integer> colorCount = new HashMap<>();
 
         for (int y = 0; y < image.getHeight(); y += 10) {
             for (int x = 0; x < image.getWidth(); x += 10) {
-                Color pixel = new Color(image.getRGB(x, y));
-                sumRed += pixel.getRed();
-                sumGreen += pixel.getGreen();
-                sumBlue += pixel.getBlue();
-                count++;
+                int rgb = image.getRGB(x, y);
+                colorCount.put(rgb, colorCount.getOrDefault(rgb, 0) + 1);
             }
         }
 
-        return new Color((int)(sumRed / count), (int)(sumGreen / count), (int)(sumBlue / count));
+        return colorCount.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+                .limit(2)
+                .map(entry -> new Color(entry.getKey()))
+                .toList();
     }
 
-    private static String findClosestDay(Color avgColor) {
+    private static String findClosestDay(List<Color> dominantColors) {
         String closestDay = null;
         double minDistance = Double.MAX_VALUE;
 
         for (Map.Entry<String, Color[]> entry : DAY_COLOR_MAP.entrySet()) {
-            Color[] gradientColors = entry.getValue();
-            double dist1 = getColorDistance(avgColor, gradientColors[0]);
-            double dist2 = getColorDistance(avgColor, gradientColors[1]);
-            double minDistForDay = Math.min(dist1, dist2);
+            Color[] dayColors = entry.getValue();
+            double dist1 = getColorDistance(dominantColors.get(0), dayColors[0]);
+            double dist2 = getColorDistance(dominantColors.get(1), dayColors[1]);
+            double avgDist = (dist1 + dist2) / 2;
 
-            if (minDistForDay < minDistance) {
-                minDistance = minDistForDay;
+            if (avgDist < minDistance) {
+                minDistance = avgDist;
                 closestDay = entry.getKey();
             }
         }
@@ -71,5 +75,22 @@ public class WallpaperGrouping {
         int gDiff = c1.getGreen() - c2.getGreen();
         int bDiff = c1.getBlue() - c2.getBlue();
         return Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+    }
+
+    // This is used in WallpaperSelectionPage to move images
+    public static void groupAndMoveIfNeeded(File imageFile) throws IOException {
+        String baseDir = System.getProperty("user.home") + "/Desktop/Wallpapers/";
+
+        for (String day : DAY_COLOR_MAP.keySet()) {
+            File dayFolder = new File(baseDir + day);
+            if (!dayFolder.exists()) dayFolder.mkdirs();
+
+            Path inTarget = Paths.get(dayFolder.getAbsolutePath(), imageFile.getName());
+            if (Files.exists(inTarget)) return; // Skip if already copied
+        }
+
+        String day = getClosestDayForWallpaper(imageFile.getAbsolutePath());
+        Path targetPath = Paths.get(baseDir + day, imageFile.getName());
+        Files.copy(imageFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
     }
 }
