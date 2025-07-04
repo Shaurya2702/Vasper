@@ -32,22 +32,48 @@ public class HomeView extends JFrame {
 
         JButton solidColorButton = ColorTheme.create3DButton("Set Solid Color");
         solidColorButton.addActionListener(e -> {
-            try {
-                String wallpaperPath = WallpaperSetter.createSolidColorWallpaper(todayGradientPaint, WIDTH, HEIGHT);
-                WallpaperSetter.setWindowsWallpaper(wallpaperPath);
-                JOptionPane.showMessageDialog(this, "Solid color wallpaper set successfully!");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Failed to set wallpaper", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() {
+                    try {
+                        String wallpaperPath = WallpaperSetter.createSolidColorWallpaper(todayGradientPaint, WIDTH, HEIGHT);
+                        WallpaperSetter.setWindowsWallpaper(wallpaperPath);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        SwingUtilities.invokeLater(() ->
+                                JOptionPane.showMessageDialog(HomeView.this, "Failed to set wallpaper", "Error", JOptionPane.ERROR_MESSAGE));
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    JOptionPane.showMessageDialog(HomeView.this, "Solid color wallpaper set successfully!");
+                }
+            };
+            worker.execute();
         });
+
 
         JButton wallpaperButton = ColorTheme.create3DButton("Set Wallpaper");
         wallpaperButton.addActionListener(e -> {
-            WallpaperSelectionPage selectionPage = new WallpaperSelectionPage();
-            selectionPage.setVisible(true);
-            dispose();
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() {
+                    // Can simulate delay or loading animation if needed
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    WallpaperSelectionPage selectionPage = new WallpaperSelectionPage();
+                    selectionPage.setVisible(true);
+                    dispose(); // Close current frame safely
+                }
+            };
+            worker.execute();   // real start of thread
         });
+
 
         bottomPanel.add(solidColorButton);
         bottomPanel.add(wallpaperButton);
@@ -59,3 +85,9 @@ public class HomeView extends JFrame {
         add(mainPanel);
     }
 }
+
+
+/* why we use SwingWorker instead of thread
+Use SwingWorker whenever your Swing UI needs to run background tasks
+and then update the UI — it's safer, cleaner, and more robust than raw Thread.
+ */

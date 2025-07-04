@@ -5,7 +5,7 @@ import org.example.model.WallpaperGrouping;
 import org.example.model.WallpaperManager;
 import org.example.model.WallpaperSetter;
 
-import javax.imageio.ImageIO;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.List;
+import java.util.Calendar;
 
 public class WallpaperSelectionPage extends JFrame {
 
@@ -73,9 +74,20 @@ public class WallpaperSelectionPage extends JFrame {
         scrollPane.setBorder(null);
         parent.add(scrollPane, BorderLayout.CENTER);
 
-        for (String day : List.of("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) {
+        List<String> days  = List.of("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
+        for (int i=0; i<7; i++) {
+            String day = days.get(i);
             JPanel dayRow = new JPanel(new BorderLayout());
-            dayRow.setOpaque(false);
+
+
+            if ((i+1) == Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
+                dayRow.setBackground(Color.CYAN);
+                dayRow.setOpaque(true);
+                dayRow.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
+            } else {
+                dayRow.setOpaque(false);
+                dayRow.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            }
 
             JLabel dayLabel = new JLabel(day);
             dayLabel.setFont(new Font("Arial", Font.BOLD, 18));
