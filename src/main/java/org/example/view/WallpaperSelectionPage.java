@@ -1,6 +1,7 @@
 package org.example.view;
 
-import org.example.controller.MainApp;
+
+import org.example.controller.AppController;
 import org.example.model.WallpaperManager;
 
 import javax.swing.*;
@@ -104,7 +105,7 @@ public class WallpaperSelectionPage extends JFrame {
         // Button to go back to the main page
         JButton backButton = ColorTheme.create3DButton("Back");
         backButton.addActionListener(e -> {
-            MainApp mainApp = new MainApp();
+            AppController mainApp = new AppController();
             mainApp.setVisible(true);
             dispose(); // Close the current window
         });
