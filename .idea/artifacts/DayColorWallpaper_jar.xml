@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DayColorWallpaper:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DayColorWallpaper_jar</output-path>
+    <root id="archive" name="DayColorWallpaper.jar">
+      <element id="module-output" name="DayColorWallpaper" />
+    </root>
+  </artifact>
+</component>
