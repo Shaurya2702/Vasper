@@ -39,7 +39,7 @@ public class WallpaperSetter {
 
     public static void setWindowsWallpaper(String imagePath) throws IOException, InterruptedException {
         // Path to the PowerShell script
-        String scriptPath = System.getProperty("user.home") + "\\Desktop\\setWallpaper.ps1";
+        String scriptPath = System.getProperty("user.home") + "\\Desktop\\WA\\setWallpaper.ps1";
 
         // Command to execute the PowerShell script
         String command = String.format("powershell.exe -ExecutionPolicy Bypass -File \"%s\" \"%s\"",
